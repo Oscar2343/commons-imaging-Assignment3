@@ -701,14 +701,14 @@ public final class Imaging {
      * @throws IOException              in the event of an unrecoverable I/O condition.
      */
     public static ImageFormat guessFormat(final ByteSource byteSource) throws IOException {
-        if (byteSource == null) {
+        if (byteSource == null) { // was untested -> now tested
             return ImageFormats.UNKNOWN;
         }
 
         try (InputStream is = byteSource.getInputStream()) {
             final int i1 = is.read();
             final int i2 = is.read();
-            if (i1 < 0 || i2 < 0) {
+            if (i1 < 0 || i2 < 0) { // was untested -> now tested
                 throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
             }
 
@@ -743,35 +743,35 @@ public final class Imaging {
             if (compareBytePair(MAGIC_NUMBERS_PAM, bytePair)) {
                 return ImageFormats.PAM;
             }
-            if (compareBytePair(MAGIC_NUMBERS_PBM_A, bytePair)) {
+            if (compareBytePair(MAGIC_NUMBERS_PBM_A, bytePair)) { // untested
                 return ImageFormats.PBM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PBM_B, bytePair)) {
                 return ImageFormats.PBM;
             }
-            if (compareBytePair(MAGIC_NUMBERS_PGM_A, bytePair)) {
+            if (compareBytePair(MAGIC_NUMBERS_PGM_A, bytePair)) { // untested
                 return ImageFormats.PGM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PGM_B, bytePair)) {
                 return ImageFormats.PGM;
             }
-            if (compareBytePair(MAGIC_NUMBERS_PPM_A, bytePair)) {
+            if (compareBytePair(MAGIC_NUMBERS_PPM_A, bytePair)) { // untested
                 return ImageFormats.PPM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PPM_B, bytePair)) {
                 return ImageFormats.PPM;
             }
-            if (compareBytePair(MAGIC_NUMBERS_JBIG2_1, bytePair)) {
+            if (compareBytePair(MAGIC_NUMBERS_JBIG2_1, bytePair)) { // was untested -> now tested
                 final int i3 = is.read();
                 final int i4 = is.read();
-                if (i3 < 0 || i4 < 0) {
+                if (i3 < 0 || i4 < 0) { // was untested -> now tested
                     throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                 }
 
                 final int b3 = i3 & 0xff;
                 final int b4 = i4 & 0xff;
                 final int[] bytePair2 = { b3, b4, };
-                if (compareBytePair(MAGIC_NUMBERS_JBIG2_2, bytePair2)) {
+                if (compareBytePair(MAGIC_NUMBERS_JBIG2_2, bytePair2)) { // untested
                     return ImageFormats.JBIG2;
                 }
             } else if (compareBytePair(MAGIC_NUMBERS_ICNS, bytePair)) {
@@ -784,7 +784,7 @@ public final class Imaging {
                 final int i3 = is.read();
                 final int i4 = is.read();
                 if (i3 < 0 || i4 < 0) {
-                    throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
+                    throw new IllegalArgumentException("Couldn't read magic numbers to guess format."); // untested
                 }
 
                 final int b3 = i3 & 0xff;
@@ -792,7 +792,7 @@ public final class Imaging {
                 final int[] bytePair2 = { b3, b4, };
                 if (compareBytePair(MAGIC_NUMBERS_RIFF_2, bytePair2)) {
                     final byte[] bytes = new byte[4];
-                    if (is.read(bytes) < 4) { // Skip file size
+                    if (is.read(bytes) < 4) { // Skip file size // was untested -> now tested
                         throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                     }
 
