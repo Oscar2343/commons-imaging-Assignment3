@@ -23,12 +23,15 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -686,6 +689,14 @@ public final class Imaging {
         return guessFormat(ByteSource.array(bytes));
     }
 
+
+    private static final Map<Integer, Boolean> branchCoverage = new HashMap<>();
+
+    static {
+        for (int i = 1; i <= 28; i++) { // Adjust based on total branches
+            branchCoverage.put(i, false);
+        }
+    }
     /**
      * Attempts to determine the image format of a file based on its "magic numbers," the first bytes of the data.
      *
@@ -702,6 +713,7 @@ public final class Imaging {
      */
     public static ImageFormat guessFormat(final ByteSource byteSource) throws IOException {
         if (byteSource == null) {
+            branchCoverage.put(1, true);
             return ImageFormats.UNKNOWN;
         }
 
@@ -709,6 +721,7 @@ public final class Imaging {
             final int i1 = is.read();
             final int i2 = is.read();
             if (i1 < 0 || i2 < 0) {
+                branchCoverage.put(2, true);
                 throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
             }
 
@@ -717,54 +730,70 @@ public final class Imaging {
             final int[] bytePair = { b1, b2, };
 
             if (compareBytePair(MAGIC_NUMBERS_GIF, bytePair)) {
+                branchCoverage.put(3, true);
                 return ImageFormats.GIF;
                 // } else if (b1 == 0x00 && b2 == 0x00) // too similar to TGA
                 // {
                 // return ImageFormat.IMAGE_FORMAT_ICO;
             }
             if (compareBytePair(MAGIC_NUMBERS_PNG, bytePair)) {
+                branchCoverage.put(4, true);
                 return ImageFormats.PNG;
             }
             if (compareBytePair(MAGIC_NUMBERS_JPEG, bytePair)) {
+                branchCoverage.put(5, true);
                 return ImageFormats.JPEG;
             }
             if (compareBytePair(MAGIC_NUMBERS_BMP, bytePair)) {
+                branchCoverage.put(6, true);
                 return ImageFormats.BMP;
             }
             if (compareBytePair(MAGIC_NUMBERS_TIFF_MOTOROLA, bytePair)) {
+                branchCoverage.put(7, true);
                 return ImageFormats.TIFF;
             }
             if (compareBytePair(MAGIC_NUMBERS_TIFF_INTEL, bytePair)) {
+                branchCoverage.put(8, true);
                 return ImageFormats.TIFF;
             }
             if (compareBytePair(MAGIC_NUMBERS_PSD, bytePair)) {
+                branchCoverage.put(9, true);
                 return ImageFormats.PSD;
             }
             if (compareBytePair(MAGIC_NUMBERS_PAM, bytePair)) {
+                branchCoverage.put(10, true);
                 return ImageFormats.PAM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PBM_A, bytePair)) {
+                branchCoverage.put(11, true);
                 return ImageFormats.PBM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PBM_B, bytePair)) {
+                branchCoverage.put(12, true);
                 return ImageFormats.PBM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PGM_A, bytePair)) {
+                branchCoverage.put(13, true);
                 return ImageFormats.PGM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PGM_B, bytePair)) {
+                branchCoverage.put(14, true);
                 return ImageFormats.PGM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PPM_A, bytePair)) {
+                branchCoverage.put(15, true);
                 return ImageFormats.PPM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PPM_B, bytePair)) {
+                branchCoverage.put(16, true);
                 return ImageFormats.PPM;
             }
             if (compareBytePair(MAGIC_NUMBERS_JBIG2_1, bytePair)) {
+                branchCoverage.put(17, true);
                 final int i3 = is.read();
                 final int i4 = is.read();
                 if (i3 < 0 || i4 < 0) {
+                    branchCoverage.put(18, true);
                     throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                 }
 
@@ -772,18 +801,24 @@ public final class Imaging {
                 final int b4 = i4 & 0xff;
                 final int[] bytePair2 = { b3, b4, };
                 if (compareBytePair(MAGIC_NUMBERS_JBIG2_2, bytePair2)) {
+                    branchCoverage.put(19, true);
                     return ImageFormats.JBIG2;
                 }
             } else if (compareBytePair(MAGIC_NUMBERS_ICNS, bytePair)) {
+                branchCoverage.put(20, true);
                 return ImageFormats.ICNS;
             } else if (compareBytePair(MAGIC_NUMBERS_DCX, bytePair)) {
+                branchCoverage.put(21, true);
                 return ImageFormats.DCX;
             } else if (compareBytePair(MAGIC_NUMBERS_RGBE, bytePair)) {
+                branchCoverage.put(22, true);
                 return ImageFormats.RGBE;
             } else if (compareBytePair(MAGIC_NUMBERS_RIFF_1, bytePair)) {
+                branchCoverage.put(23, true);
                 final int i3 = is.read();
                 final int i4 = is.read();
                 if (i3 < 0 || i4 < 0) {
+                    branchCoverage.put(24, true);
                     throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                 }
 
@@ -791,12 +826,15 @@ public final class Imaging {
                 final int b4 = i4 & 0xff;
                 final int[] bytePair2 = { b3, b4, };
                 if (compareBytePair(MAGIC_NUMBERS_RIFF_2, bytePair2)) {
+                    branchCoverage.put(25, true);
                     final byte[] bytes = new byte[4];
                     if (is.read(bytes) < 4) { // Skip file size
+                        branchCoverage.put(26, true);
                         throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                     }
 
                     if (is.read(bytes) == 4 && Arrays.equals(MAGIC_NUMBERS_WEBP, bytes)) {
+                        branchCoverage.put(27, true);
                         return ImageFormats.WEBP;
                     }
                 }
@@ -804,11 +842,38 @@ public final class Imaging {
             return Stream.of(ImageFormats.values()).filter(imageFormat -> Stream.of(imageFormat.getExtensions()).anyMatch(extension -> {
                 final String fileName = byteSource.getFileName();
                 if (fileName == null || fileName.trim().isEmpty()) {
+                    branchCoverage.put(28, true);
                     return false;
                 }
                 final String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
                 return extension != null && !extension.trim().isEmpty() && fileExtension.equalsIgnoreCase(extension);
             })).findFirst().orElse(ImageFormats.UNKNOWN);
+        }
+    }
+
+    public static void generateCoverageReport() {
+        String filePath = "branch_coverage_report.txt";
+        int hitCount = 0;
+    
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write("Branch Coverage Report:\n");
+    
+            for (Map.Entry<Integer, Boolean> entry : branchCoverage.entrySet()) {
+                int branch = entry.getKey();
+                boolean hit = entry.getValue();
+            
+                writer.write("Branch " + branch + ": " + (hit ? "Executed" : "Not Executed") + "\n");
+            
+                if (hit) {
+                    hitCount++;
+                }
+            }
+            double coveragePercentage = ((double) hitCount / branchCoverage.size()) * 100;
+            writer.write("Coverage percentage: " + String.format("%.2f", coveragePercentage) + "%\n");
+    
+            System.out.println("Branch coverage report written to " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

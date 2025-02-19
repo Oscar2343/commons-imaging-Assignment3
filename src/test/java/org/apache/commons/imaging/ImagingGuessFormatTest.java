@@ -68,6 +68,7 @@ public class ImagingGuessFormatTest extends AbstractImagingTest {
 
         final ImageFormat guessedFormat = Imaging.guessFormat(imageFile);
         assertEquals(expectedFormat, guessedFormat);
+        Imaging.generateCoverageReport();
     }
 
 }
