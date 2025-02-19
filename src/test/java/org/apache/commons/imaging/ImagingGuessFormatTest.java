@@ -15,60 +15,119 @@
  * limitations under the License.
  */
 
-package org.apache.commons.imaging;
+ package org.apache.commons.imaging;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-import org.apache.commons.io.FilenameUtils;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-
-public class ImagingGuessFormatTest extends AbstractImagingTest {
-
-    public static final String BMP_IMAGE_FILE = "bmp\\1\\Oregon Scientific DS6639 - DSC_0307 - small.bmp";
-    public static final String PNG_IMAGE_FILE = "png\\1\\Oregon Scientific DS6639 - DSC_0307 - small.png";
-    public static final String GIF_IMAGE_FILE = "gif\\single\\1\\Oregon Scientific DS6639 - DSC_0307 - small.gif";
-    public static final String ICNS_IMAGE_FILE = "icns\\1\\poedit48x48.icns";
-    public static final String ICO_IMAGE_FILE = "ico\\1\\Oregon Scientific DS6639 - DSC_0307 - small.ico";
-    public static final String TIFF_IMAGE_FILE = "tiff\\1\\Oregon Scientific DS6639 - DSC_0307 - small.tif";
-    public static final String JPEG_IMAGE_FILE = "jpg\\1\\Oregon Scientific DS6639 - DSC_0307 - small.jpg";
-    public static final String PSD_IMAGE_FILE = "psd\\1\\Oregon Scientific DS6639 - DSC_0307 - small.psd";
-    public static final String PBM_IMAGE_FILE = "pbm\\1\\Oregon Scientific DS6639 - DSC_0307 - small.pbm";
-    public static final String PGM_IMAGE_FILE = "pbm\\1\\Oregon Scientific DS6639 - DSC_0307 - small.pgm";
-    public static final String PPM_IMAGE_FILE = "pbm\\1\\Oregon Scientific DS6639 - DSC_0307 - small.ppm";
-    public static final String TGA_IMAGE_FILE = "tga\\1\\Oregon Scientific DS6639 - DSC_0307 - small.tga";
-    public static final String UNKNOWN_IMAGE_FILE = "info.txt";
-
-    public static Stream<Object[]> data() {
-        return Arrays.asList(new Object[] { ImageFormats.PNG, PNG_IMAGE_FILE }, new Object[] { ImageFormats.GIF, GIF_IMAGE_FILE },
-                new Object[] { ImageFormats.ICNS, ICNS_IMAGE_FILE },
-                // TODO(cmchen): add ability to sniff ICOs if possible.
-                // new Object[] { ImageFormat.IMAGE_FORMAT_ICO, ICO_IMAGE_FILE },
-                new Object[] { ImageFormats.TIFF, TIFF_IMAGE_FILE }, new Object[] { ImageFormats.JPEG, JPEG_IMAGE_FILE },
-                new Object[] { ImageFormats.BMP, BMP_IMAGE_FILE }, new Object[] { ImageFormats.PSD, PSD_IMAGE_FILE },
-                new Object[] { ImageFormats.PBM, PBM_IMAGE_FILE }, new Object[] { ImageFormats.PGM, PGM_IMAGE_FILE },
-                new Object[] { ImageFormats.PPM, PPM_IMAGE_FILE },
-                // TODO(cmchen): add ability to sniff TGAs if possible.
-                // new Object[] { ImageFormat.IMAGE_FORMAT_TGA, TGA_IMAGE_FILE },
-                // TODO(cmchen): Add test images for these formats.
-                // new Object[] { ImageFormat.IMAGE_FORMAT_PNM, PNM_IMAGE_FILE },
-                // new Object[] { ImageFormat.IMAGE_FORMAT_JBIG2, JBIG2_IMAGE_FILE },
-                new Object[] { ImageFormats.UNKNOWN, UNKNOWN_IMAGE_FILE }).stream();
-    }
-
-    @ParameterizedTest
-    @MethodSource("data")
-    public void testGuessFormat(final ImageFormats expectedFormat, final String pathToFile) throws Exception {
-        final String imagePath = FilenameUtils.separatorsToSystem(pathToFile);
-        final File imageFile = new File(ImagingTestConstants.TEST_IMAGE_FOLDER, imagePath);
-
-        final ImageFormat guessedFormat = Imaging.guessFormat(imageFile);
-        assertEquals(expectedFormat, guessedFormat);
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertThrows;
+ 
+ import java.io.ByteArrayInputStream;
+ import java.io.File;
+ import java.io.IOException;
+ import java.util.Arrays;
+ import java.util.stream.Stream;
+ 
+ import org.apache.commons.imaging.bytesource.ByteSource;
+ import org.apache.commons.io.FilenameUtils;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.params.ParameterizedTest;
+ import org.junit.jupiter.params.provider.MethodSource;
+ 
+ public class ImagingGuessFormatTest extends AbstractImagingTest {
+ 
+     public static final String BMP_IMAGE_FILE = "bmp\\1\\Oregon Scientific DS6639 - DSC_0307 - small.bmp";
+     public static final String PNG_IMAGE_FILE = "png\\1\\Oregon Scientific DS6639 - DSC_0307 - small.png";
+     public static final String GIF_IMAGE_FILE = "gif\\single\\1\\Oregon Scientific DS6639 - DSC_0307 - small.gif";
+     public static final String ICNS_IMAGE_FILE = "icns\\1\\poedit48x48.icns";
+     public static final String ICO_IMAGE_FILE = "ico\\1\\Oregon Scientific DS6639 - DSC_0307 - small.ico";
+     public static final String TIFF_IMAGE_FILE = "tiff\\1\\Oregon Scientific DS6639 - DSC_0307 - small.tif";
+     public static final String JPEG_IMAGE_FILE = "jpg\\1\\Oregon Scientific DS6639 - DSC_0307 - small.jpg";
+     public static final String PSD_IMAGE_FILE = "psd\\1\\Oregon Scientific DS6639 - DSC_0307 - small.psd";
+     public static final String PBM_IMAGE_FILE = "pbm\\1\\Oregon Scientific DS6639 - DSC_0307 - small.pbm";
+     public static final String PGM_IMAGE_FILE = "pbm\\1\\Oregon Scientific DS6639 - DSC_0307 - small.pgm";
+     public static final String PPM_IMAGE_FILE = "pbm\\1\\Oregon Scientific DS6639 - DSC_0307 - small.ppm";
+     public static final String TGA_IMAGE_FILE = "tga\\1\\Oregon Scientific DS6639 - DSC_0307 - small.tga";
+     public static final String UNKNOWN_IMAGE_FILE = "info.txt";
+ 
+     public static Stream<Object[]> data() {
+         return Arrays.asList(new Object[] { ImageFormats.PNG, PNG_IMAGE_FILE }, new Object[] { ImageFormats.GIF, GIF_IMAGE_FILE },
+                 new Object[] { ImageFormats.ICNS, ICNS_IMAGE_FILE },
+                 // TODO(cmchen): add ability to sniff ICOs if possible.
+                 // new Object[] { ImageFormat.IMAGE_FORMAT_ICO, ICO_IMAGE_FILE },
+                 new Object[] { ImageFormats.TIFF, TIFF_IMAGE_FILE }, new Object[] { ImageFormats.JPEG, JPEG_IMAGE_FILE },
+                 new Object[] { ImageFormats.BMP, BMP_IMAGE_FILE }, new Object[] { ImageFormats.PSD, PSD_IMAGE_FILE },
+                 new Object[] { ImageFormats.PBM, PBM_IMAGE_FILE }, new Object[] { ImageFormats.PGM, PGM_IMAGE_FILE },
+                 new Object[] { ImageFormats.PPM, PPM_IMAGE_FILE },
+                 // TODO(cmchen): add ability to sniff TGAs if possible.
+                 // new Object[] { ImageFormat.IMAGE_FORMAT_TGA, TGA_IMAGE_FILE },
+                 // TODO(cmchen): Add test images for these formats.
+                 // new Object[] { ImageFormat.IMAGE_FORMAT_PNM, PNM_IMAGE_FILE },
+                 // new Object[] { ImageFormat.IMAGE_FORMAT_JBIG2, JBIG2_IMAGE_FILE },
+                 new Object[] { ImageFormats.UNKNOWN, UNKNOWN_IMAGE_FILE }).stream();
+     }
+ 
+     @ParameterizedTest
+     @MethodSource("data")
+     public void testGuessFormat(final ImageFormats expectedFormat, final String pathToFile) throws Exception {
+         final String imagePath = FilenameUtils.separatorsToSystem(pathToFile);
+         final File imageFile = new File(ImagingTestConstants.TEST_IMAGE_FOLDER, imagePath);
+ 
+         final ImageFormat guessedFormat = Imaging.guessFormat(imageFile);
+         assertEquals(expectedFormat, guessedFormat);
+         Imaging.generateCoverageReport();
+     }
+ 
+     /**
+      * Test case for byteSource == null. - covers branch 1
+      */
+     @Test
+     void testNullByteSource() throws IOException {
+         ByteSource nullByteSource = null;
+         ImageFormat result = Imaging.guessFormat(nullByteSource);
+         assertEquals(ImageFormats.UNKNOWN, result, "Null input should return UNKNOWN format.");
+         Imaging.generateCoverageReport();
+     }
+ 
+     /**
+      * Test case for empty input. - covers branch 2
+      */
+     @Test
+     void testEmptyInputStream() {
+         ByteSource emptyByteSource = ByteSource.inputStream(new ByteArrayInputStream(new byte[0]), "empty.dat");
+         Exception exception = assertThrows(IllegalArgumentException.class, 
+             () -> Imaging.guessFormat(emptyByteSource), "Empty input should throw an IllegalArgumentException.");
+         
+         assertEquals("Couldn't read magic numbers to guess format.", exception.getMessage(),
+             "Exception message should match expected error.");
         Imaging.generateCoverageReport();
-    }
-
-}
+     }
+ 
+     /**
+      * Test case for a JBIG2 when the first magic numbers match but checks for i3 and i4 fail. - covers branch 17 and 18
+      */
+     @Test
+     void testGuessFormatWithJBIG2() throws IOException {
+         byte[] jbig2Header = new byte[]{(byte) 0x97, (byte) 0x4A}; // JBIG2 first magic number
+         ByteSource jbig2ByteSource = ByteSource.inputStream(new ByteArrayInputStream(jbig2Header), "test.jbig2");
+         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+             Imaging.guessFormat(jbig2ByteSource);
+         });
+         assertEquals("Couldn't read magic numbers to guess format.", exception.getMessage());
+         Imaging.generateCoverageReport();
+     }
+ 
+     /**
+      * Test case for a corrupt RIFF file.
+      */
+     @Test
+     void testGuessFormatWithCorruptRIFF() throws IOException {
+         byte[] corruptRIFFHeader = new byte[]{'R', 'I', 'F', 'F', 0x00, 0x00}; // shortened RIFF - covers branch 26
+         ByteSource riffByteSource = ByteSource.inputStream(new ByteArrayInputStream(corruptRIFFHeader), "test.riff");
+         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+             Imaging.guessFormat(riffByteSource);
+         });
+         assertEquals("Couldn't read magic numbers to guess format.", exception.getMessage());
+         Imaging.generateCoverageReport();
+     }
+ 
+ }
+ 
