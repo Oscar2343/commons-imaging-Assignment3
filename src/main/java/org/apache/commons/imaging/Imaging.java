@@ -703,12 +703,12 @@ public final class Imaging {
      * @throws IOException              in the event of an unrecoverable I/O condition.
      */
     public static ImageFormat guessFormat(final ByteSource byteSource) throws IOException {
-        if (byteSource == null) return ImageFormats.UNKNOWN;
+        if (byteSource == null) return ImageFormats.UNKNOWN; // was untested -> now tested
         
         try (InputStream is = byteSource.getInputStream()) {
             final int i1 = is.read();
             final int i2 = is.read();
-            if (i1 < 0 || i2 < 0) {
+            if (i1 < 0 || i2 < 0) { // was untested -> now tested
                 throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
             }
     
@@ -717,7 +717,20 @@ public final class Imaging {
             final int[] bytePair = { b1, b2, };
             
             ImageFormat format = checkMagicNumbers(bytePair, is);
-            return format != ImageFormats.UNKNOWN ? format : guessFormatByExtension(byteSource);
+
+            if (format != ImageFormats.UNKNOWN) {
+                return format;
+            }
+            else {
+                return Stream.of(ImageFormats.values()).filter(imageFormat -> Stream.of(imageFormat.getExtensions()).anyMatch(extension -> {
+                    final String fileName = byteSource.getFileName();
+                    if (fileName == null || fileName.trim().isEmpty()) {
+                        return false;
+                    }
+                    final String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                    return extension != null && !extension.trim().isEmpty() && fileExtension.equalsIgnoreCase(extension);
+                })).findFirst().orElse(ImageFormats.UNKNOWN);
+            }
         }
     }
     
@@ -775,7 +788,6 @@ public final class Imaging {
         return ImageFormats.UNKNOWN;
     }
     
-    
     private static Map<int[], ImageFormat> getFormatMap() {
         Map<int[], ImageFormat> formatMap = new HashMap<>();
         formatMap.put(MAGIC_NUMBERS_GIF, ImageFormats.GIF);
@@ -796,18 +808,7 @@ public final class Imaging {
         
         return formatMap;
     }
-    
-    private static ImageFormat guessFormatByExtension(ByteSource byteSource) {
-        return Stream.of(ImageFormats.values()).filter(imageFormat -> Stream.of(imageFormat.getExtensions()).anyMatch(extension -> {
-            final String fileName = byteSource.getFileName();
-            if (fileName == null || fileName.trim().isEmpty()) {
-                return false;
-            }
-            final String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
-            return extension != null && !extension.trim().isEmpty() && fileExtension.equalsIgnoreCase(extension);
-        })).findFirst().orElse(ImageFormats.UNKNOWN);
-    }
-    
+        
     /**
      * Attempts to determine the image format of a file based on its "magic numbers," the first bytes of the data.
      *
