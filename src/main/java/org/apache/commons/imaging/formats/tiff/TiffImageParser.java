@@ -19,6 +19,7 @@ package org.apache.commons.imaging.formats.tiff;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -682,6 +683,17 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
             throw new ImagingException("TIFF: Unknown fPhotometricInterpretation: " + photometricInterpretation);
         }
     }
+   
+    private static final String FILE_PATH = "coverage.log";
+
+    private static void logBranch(int branchId) {
+        try (FileWriter writer = new FileWriter(FILE_PATH, true)) { // Append mode
+            writer.write(branchId + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     /**
      * Reads the content of a TIFF file that contains numerical data samples rather than image-related pixels.
@@ -712,17 +724,20 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
      */
     TiffRasterData getRasterData(final TiffDirectory directory, final ByteOrder byteOrder, TiffImagingParameters params) throws ImagingException, IOException {
         if (params == null) {
+            logBranch(0);
             params = getDefaultParameters();
         }
 
         final short[] sSampleFmt = directory.getFieldValue(TiffTagConstants.TIFF_TAG_SAMPLE_FORMAT, true);
         if (sSampleFmt == null || sSampleFmt.length < 1) {
+            logBranch(1);
             throw new ImagingException("Directory does not specify numeric raster data");
         }
 
         int samplesPerPixel = 1;
         final TiffField samplesPerPixelField = directory.findField(TiffTagConstants.TIFF_TAG_SAMPLES_PER_PIXEL);
         if (samplesPerPixelField != null) {
+            logBranch(2);
             samplesPerPixel = samplesPerPixelField.getIntValue();
         }
 
@@ -730,12 +745,14 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
         int bitsPerPixel = samplesPerPixel;
         final TiffField bitsPerSampleField = directory.findField(TiffTagConstants.TIFF_TAG_BITS_PER_SAMPLE);
         if (bitsPerSampleField != null) {
+            logBranch(3);
             bitsPerSample = bitsPerSampleField.getIntArrayValue();
             bitsPerPixel = bitsPerSampleField.getIntValueOrArraySum();
         }
 
         final short compressionFieldValue;
         if (directory.findField(TiffTagConstants.TIFF_TAG_COMPRESSION) != null) {
+            logBranch(4);
             compressionFieldValue = directory.getFieldValue(TiffTagConstants.TIFF_TAG_COMPRESSION);
         } else {
             compressionFieldValue = TiffConstants.COMPRESSION_UNCOMPRESSED_1;
@@ -749,29 +766,36 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
         if (subImage != null) {
             // Check for valid subimage specification. The following checks
             // are consistent with BufferedImage.getSubimage()
+            logBranch(5);
             if (subImage.width <= 0) {
+                logBranch(6);
                 throw new ImagingException("Negative or zero subimage width.");
             }
             if (subImage.height <= 0) {
+                logBranch(7);
                 throw new ImagingException("Negative or zero subimage height.");
             }
             if (subImage.x < 0 || subImage.x >= width) {
+                logBranch(8);
                 throw new ImagingException("Subimage x is outside raster.");
             }
             if (subImage.x + subImage.width > width) {
+                logBranch(9);
                 throw new ImagingException("Subimage (x+width) is outside raster.");
             }
             if (subImage.y < 0 || subImage.y >= height) {
+                logBranch(10);
                 throw new ImagingException("Subimage y is outside raster.");
             }
             if (subImage.y + subImage.height > height) {
+                logBranch(11);
                 throw new ImagingException("Subimage (y+height) is outside raster.");
             }
 
             // if the subimage is just the same thing as the whole
             // image, suppress the subimage processing
             if (subImage.x == 0 && subImage.y == 0 && subImage.width == width && subImage.height == height) {
-                subImage = null;
+                logBranch(12);subImage = null;
             }
         }
 
@@ -786,6 +810,7 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
             // dumpOptionalNumberTag(entries, TIFF_TAG_PLANAR_CONFIGURATION);
             final TiffField predictorField = directory.findField(TiffTagConstants.TIFF_TAG_PREDICTOR);
             if (null != predictorField) {
+                logBranch(13);
                 predictor = predictorField.getIntValueOrArraySum();
             }
         }
@@ -796,26 +821,32 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
                 : TiffPlanarConfiguration.lenientValueOf(pcField.getIntValue());
 
         if (sSampleFmt[0] == TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT) {
+            logBranch(14);
             if (bitsPerSample[0] != 32 && bitsPerSample[0] != 64) {
+                logBranch(15);
                 throw new ImagingException("TIFF floating-point data uses unsupported bits-per-sample: " + bitsPerSample[0]);
             }
 
             if (predictor != -1 && predictor != TiffTagConstants.PREDICTOR_VALUE_NONE
                     && predictor != TiffTagConstants.PREDICTOR_VALUE_FLOATING_POINT_DIFFERENCING) {
+                logBranch(16);
                 throw new ImagingException("TIFF floating-point data uses unsupported horizontal-differencing predictor");
             }
         } else if (sSampleFmt[0] == TiffTagConstants.SAMPLE_FORMAT_VALUE_TWOS_COMPLEMENT_SIGNED_INTEGER) {
-
+            logBranch(17);
             if (samplesPerPixel != 1) {
+                logBranch(18);
                 throw new ImagingException("TIFF integer data uses unsupported samples per pixel: " + samplesPerPixel);
             }
 
             if (bitsPerPixel != 16 && bitsPerPixel != 32) {
+                logBranch(19);
                 throw new ImagingException("TIFF integer data uses unsupported bits-per-pixel: " + bitsPerPixel);
             }
 
             if (predictor != -1 && predictor != TiffTagConstants.PREDICTOR_VALUE_NONE
                     && predictor != TiffTagConstants.PREDICTOR_VALUE_HORIZONTAL_DIFFERENCING) {
+                logBranch(20);
                 throw new ImagingException("TIFF integer data uses unsupported horizontal-differencing predictor");
             }
         } else {
@@ -834,7 +865,6 @@ public class TiffImageParser extends AbstractImageParser<TiffImagingParameters> 
 
         return dataReader.readRasterData(subImage);
     }
-
     @Override
     public String getXmpXml(final ByteSource byteSource, XmpImagingParameters<TiffImagingParameters> params) throws ImagingException, IOException {
         if (params == null) {
