@@ -27,8 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -701,117 +703,111 @@ public final class Imaging {
      * @throws IOException              in the event of an unrecoverable I/O condition.
      */
     public static ImageFormat guessFormat(final ByteSource byteSource) throws IOException {
-        if (byteSource == null) { // was untested -> now tested
-            return ImageFormats.UNKNOWN;
-        }
-
+        if (byteSource == null) return ImageFormats.UNKNOWN;
+        
         try (InputStream is = byteSource.getInputStream()) {
             final int i1 = is.read();
             final int i2 = is.read();
-            if (i1 < 0 || i2 < 0) { // was untested -> now tested
+            if (i1 < 0 || i2 < 0) {
                 throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
             }
-
+    
             final int b1 = i1 & 0xff;
             final int b2 = i2 & 0xff;
             final int[] bytePair = { b1, b2, };
-
-            if (compareBytePair(MAGIC_NUMBERS_GIF, bytePair)) {
-                return ImageFormats.GIF;
-                // } else if (b1 == 0x00 && b2 == 0x00) // too similar to TGA
-                // {
-                // return ImageFormat.IMAGE_FORMAT_ICO;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PNG, bytePair)) {
-                return ImageFormats.PNG;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_JPEG, bytePair)) {
-                return ImageFormats.JPEG;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_BMP, bytePair)) {
-                return ImageFormats.BMP;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_TIFF_MOTOROLA, bytePair)) {
-                return ImageFormats.TIFF;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_TIFF_INTEL, bytePair)) {
-                return ImageFormats.TIFF;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PSD, bytePair)) {
-                return ImageFormats.PSD;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PAM, bytePair)) {
-                return ImageFormats.PAM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PBM_A, bytePair)) { // untested
-                return ImageFormats.PBM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PBM_B, bytePair)) {
-                return ImageFormats.PBM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PGM_A, bytePair)) { // untested
-                return ImageFormats.PGM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PGM_B, bytePair)) {
-                return ImageFormats.PGM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PPM_A, bytePair)) { // untested
-                return ImageFormats.PPM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_PPM_B, bytePair)) {
-                return ImageFormats.PPM;
-            }
-            if (compareBytePair(MAGIC_NUMBERS_JBIG2_1, bytePair)) { // was untested -> now tested
-                final int i3 = is.read();
-                final int i4 = is.read();
-                if (i3 < 0 || i4 < 0) { // was untested -> now tested
-                    throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
-                }
-
-                final int b3 = i3 & 0xff;
-                final int b4 = i4 & 0xff;
-                final int[] bytePair2 = { b3, b4, };
-                if (compareBytePair(MAGIC_NUMBERS_JBIG2_2, bytePair2)) { // untested
-                    return ImageFormats.JBIG2;
-                }
-            } else if (compareBytePair(MAGIC_NUMBERS_ICNS, bytePair)) {
-                return ImageFormats.ICNS;
-            } else if (compareBytePair(MAGIC_NUMBERS_DCX, bytePair)) {
-                return ImageFormats.DCX;
-            } else if (compareBytePair(MAGIC_NUMBERS_RGBE, bytePair)) {
-                return ImageFormats.RGBE;
-            } else if (compareBytePair(MAGIC_NUMBERS_RIFF_1, bytePair)) {
-                final int i3 = is.read();
-                final int i4 = is.read();
-                if (i3 < 0 || i4 < 0) {
-                    throw new IllegalArgumentException("Couldn't read magic numbers to guess format."); // untested
-                }
-
-                final int b3 = i3 & 0xff;
-                final int b4 = i4 & 0xff;
-                final int[] bytePair2 = { b3, b4, };
-                if (compareBytePair(MAGIC_NUMBERS_RIFF_2, bytePair2)) {
-                    final byte[] bytes = new byte[4];
-                    if (is.read(bytes) < 4) { // Skip file size // was untested -> now tested
-                        throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
-                    }
-
-                    if (is.read(bytes) == 4 && Arrays.equals(MAGIC_NUMBERS_WEBP, bytes)) {
-                        return ImageFormats.WEBP;
-                    }
-                }
-            }
-            return Stream.of(ImageFormats.values()).filter(imageFormat -> Stream.of(imageFormat.getExtensions()).anyMatch(extension -> {
-                final String fileName = byteSource.getFileName();
-                if (fileName == null || fileName.trim().isEmpty()) {
-                    return false;
-                }
-                final String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
-                return extension != null && !extension.trim().isEmpty() && fileExtension.equalsIgnoreCase(extension);
-            })).findFirst().orElse(ImageFormats.UNKNOWN);
+            
+            ImageFormat format = checkMagicNumbers(bytePair, is);
+            return format != ImageFormats.UNKNOWN ? format : guessFormatByExtension(byteSource);
         }
     }
+    
+    private static ImageFormat checkMagicNumbers(int[] bytePair, InputStream is) throws IOException {
+        Map<int[], ImageFormat> formatMap = getFormatMap();
+    
+        for (Map.Entry<int[], ImageFormat> entry : formatMap.entrySet()) {
+            if (compareBytePair(entry.getKey(), bytePair)) {
+                return entry.getValue();
+            }
+        }
 
+        if (compareBytePair(MAGIC_NUMBERS_JBIG2_1, bytePair)) { // was untested -> now tested
+            final int i3 = is.read();
+            final int i4 = is.read();
+            if (i3 < 0 || i4 < 0) { // was untested -> now tested
+                throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
+            }
+    
+            final int b3 = i3 & 0xff;
+            final int b4 = i4 & 0xff;
+            final int[] bytePair2 = { b3, b4, };
+            
+            if (compareBytePair(MAGIC_NUMBERS_JBIG2_2, bytePair2)) { // untested
+                return ImageFormats.JBIG2;
+            }
+        } else if (compareBytePair(MAGIC_NUMBERS_ICNS, bytePair)) {
+            return ImageFormats.ICNS;
+        } else if (compareBytePair(MAGIC_NUMBERS_DCX, bytePair)) {
+            return ImageFormats.DCX;
+        } else if (compareBytePair(MAGIC_NUMBERS_RGBE, bytePair)) {
+            return ImageFormats.RGBE;
+        } else if (compareBytePair(MAGIC_NUMBERS_RIFF_1, bytePair)) {
+            final int i3 = is.read();
+            final int i4 = is.read();
+            if (i3 < 0 || i4 < 0) {
+                throw new IllegalArgumentException("Couldn't read magic numbers to guess format."); // untested
+            }
+    
+            final int b3 = i3 & 0xff;
+            final int b4 = i4 & 0xff;
+            final int[] bytePair2 = { b3, b4, };
+            if (compareBytePair(MAGIC_NUMBERS_RIFF_2, bytePair2)) {
+                final byte[] bytes = new byte[4];
+                if (is.read(bytes) < 4) { // Skip file size // was untested -> now tested
+                    throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
+                }
+    
+                if (is.read(bytes) == 4 && Arrays.equals(MAGIC_NUMBERS_WEBP, bytes)) {
+                    return ImageFormats.WEBP;
+                }
+            }
+        }
+        
+        return ImageFormats.UNKNOWN;
+    }
+    
+    
+    private static Map<int[], ImageFormat> getFormatMap() {
+        Map<int[], ImageFormat> formatMap = new HashMap<>();
+        formatMap.put(MAGIC_NUMBERS_GIF, ImageFormats.GIF);
+        formatMap.put(MAGIC_NUMBERS_PNG, ImageFormats.PNG);
+        formatMap.put(MAGIC_NUMBERS_JPEG, ImageFormats.JPEG);
+        formatMap.put(MAGIC_NUMBERS_BMP, ImageFormats.BMP);
+        formatMap.put(MAGIC_NUMBERS_TIFF_MOTOROLA, ImageFormats.TIFF);
+        formatMap.put(MAGIC_NUMBERS_TIFF_INTEL, ImageFormats.TIFF);
+        formatMap.put(MAGIC_NUMBERS_PSD, ImageFormats.PSD);
+    
+        formatMap.put(MAGIC_NUMBERS_PAM, ImageFormats.PAM);
+        formatMap.put(MAGIC_NUMBERS_PBM_A, ImageFormats.PBM);
+        formatMap.put(MAGIC_NUMBERS_PBM_B, ImageFormats.PBM);
+        formatMap.put(MAGIC_NUMBERS_PGM_A, ImageFormats.PGM);
+        formatMap.put(MAGIC_NUMBERS_PGM_B, ImageFormats.PGM);
+        formatMap.put(MAGIC_NUMBERS_PPM_A, ImageFormats.PPM);
+        formatMap.put(MAGIC_NUMBERS_PPM_B, ImageFormats.PPM);
+        
+        return formatMap;
+    }
+    
+    private static ImageFormat guessFormatByExtension(ByteSource byteSource) {
+        return Stream.of(ImageFormats.values()).filter(imageFormat -> Stream.of(imageFormat.getExtensions()).anyMatch(extension -> {
+            final String fileName = byteSource.getFileName();
+            if (fileName == null || fileName.trim().isEmpty()) {
+                return false;
+            }
+            final String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            return extension != null && !extension.trim().isEmpty() && fileExtension.equalsIgnoreCase(extension);
+        })).findFirst().orElse(ImageFormats.UNKNOWN);
+    }
+    
     /**
      * Attempts to determine the image format of a file based on its "magic numbers," the first bytes of the data.
      *
