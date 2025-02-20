@@ -102,7 +102,7 @@
      }
  
      /**
-      * Test case for a JBIG2 when the first magic numbers match but checks for i3 and i4 fail. - covers branch 17 and 18
+      * Test case for a JBIG2 when the first magic numbers match but checks for i3 and i4 fail. - covers branch 18 and 19
       */
      @Test
      void testGuessFormatWithJBIG2() throws IOException {
@@ -116,7 +116,7 @@
      }
  
      /**
-      * Test case for a corrupt RIFF file.
+      * Test case for a corrupt RIFF file. - covers branch 29
       */
      @Test
      void testGuessFormatWithCorruptRIFF() throws IOException {
