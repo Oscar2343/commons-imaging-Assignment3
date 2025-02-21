@@ -170,163 +170,163 @@ public class BasicCParser {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean seenFirstComment = firstComment == null;
         final StringBuilder directiveBuffer = new StringBuilder();
-        for (int c = is.read(); c != -1; c = is.read()) {
-            if (inComment) {
-                if (c == '*') {
-                    if (hadStar && !seenFirstComment) {
+        for (int c = is.read(); c != -1; c = is.read()) {      
+            if (inComment) {//tested                    
+                if (c == '*') {//tested
+                    if (hadStar && !seenFirstComment) {        //untested
                         firstComment.append('*');
                     }
                     hadStar = true;
-                } else if (c == '/') {
-                    if (hadStar) {
+                } else if (c == '/') {  //tested    
+                    if (hadStar) {          //untested
                         hadStar = false;
                         inComment = false;
                         seenFirstComment = true;
-                    } else if (!seenFirstComment) {
+                    } else if (!seenFirstComment) {          //untested
                         firstComment.append((char) c);
                     }
-                } else {
+                } else {//tested
                     if (hadStar && !seenFirstComment) {
                         firstComment.append('*');
                     }
                     hadStar = false;
-                    if (!seenFirstComment) {
+                    if (!seenFirstComment) {//tested
                         firstComment.append((char) c);
                     }
                 }
-            } else if (inSingleQuotes) {
+            } else if (inSingleQuotes) {              //untested
                 switch (c) {
-                case '\\':
-                    if (hadBackSlash) {
+                case '\\':                          //untested
+                    if (hadBackSlash) {          //untested
                         out.write('\\');
                         out.write('\\');
                         hadBackSlash = false;
-                    } else {
+                    } else {                          //untested
                         hadBackSlash = true;
                     }
                     break;
-                case '\'':
-                    if (hadBackSlash) {
+                case '\'':                         //untested
+                    if (hadBackSlash) {                         //untested
                         out.write('\\');
                         hadBackSlash = false;
-                    } else {
+                    } else {                         //untested
                         inSingleQuotes = false;
                     }
                     out.write('\'');
                     break;
-                case '\r':
-                case '\n':
+                case '\r':                         //untested
+                case '\n':                         //untested
                     throw new ImagingException("Unterminated single quote in file");
-                default:
-                    if (hadBackSlash) {
+                default:                         //untested
+                    if (hadBackSlash) {                         //untested
                         out.write('\\');
                         hadBackSlash = false;
                     }
                     out.write(c);
                     break;
                 }
-            } else if (inString) {
+            } else if (inString) {//tested
                 switch (c) {
-                case '\\':
-                    if (hadBackSlash) {
+                case '\\':                         //untested
+                    if (hadBackSlash) {                         //untested
                         out.write('\\');
                         out.write('\\');
                         hadBackSlash = false;
-                    } else {
+                    } else {                         //untested
                         hadBackSlash = true;
                     }
                     break;
                 case '"':
-                    if (hadBackSlash) {
+                    if (hadBackSlash) {                         //untested
                         out.write('\\');
                         hadBackSlash = false;
-                    } else {
+                    } else {//tested
                         inString = false;
                     }
                     out.write('"');
                     break;
-                case '\r':
+                case '\r':                         //untested
                 case '\n':                      //untested for true --> now testet
                     throw new ImagingException("Unterminated string in file");
-                default:
-                    if (hadBackSlash) {
+                default://tested
+                    if (hadBackSlash) {//tested
                         out.write('\\');
                         hadBackSlash = false;
                     }
                     out.write(c);
                     break;
                 }
-            } else if (inDirective) {
-                if (c == '\r' || c == '\n') {
+            } else if (inDirective) {//tested
+                if (c == '\r' || c == '\n') {//tested
                     inDirective = false;
                     final String[] tokens = tokenizeRow(directiveBuffer.toString());
-                    if (tokens.length < 2 || tokens.length > 3) {
+                    if (tokens.length < 2 || tokens.length > 3) {                         //untested
                         throw new ImagingException("Bad preprocessor directive");
                     }
-                    if (!tokens[0].equals("define")) {
+                    if (!tokens[0].equals("define")) {                         //untested
                         throw new ImagingException("Invalid/unsupported " + "preprocessor directive '" + tokens[0] + "'");
                     }
                     defines.put(tokens[1], tokens.length == 3 ? tokens[2] : null);
                     directiveBuffer.setLength(0);
-                } else {
+                } else {//tested
                     directiveBuffer.append((char) c);
                 }
-            } else {
+            } else {//tested
                 switch (c) {
-                case '/':
-                    if (hadSlash) {
+                case '/'://tested
+                    if (hadSlash) {                         //untested
                         out.write('/');
                     }
                     hadSlash = true;
                     break;
-                case '*':
-                    if (hadSlash) {
+                case '*'://tested
+                    if (hadSlash) {//tested
                         inComment = true;
                         hadSlash = false;
-                    } else {
+                    } else {//tested
                         out.write(c);
                     }
                     break;
-                case '\'':
-                    if (hadSlash) {
+                case '\'':                         //untested
+                    if (hadSlash) {                         //untested
                         out.write('/');
                     }
                     hadSlash = false;
                     out.write(c);
                     inSingleQuotes = true;
                     break;
-                case '"':
-                    if (hadSlash) {
+                case '"'://tested
+                    if (hadSlash) {                         //untested
                         out.write('/');
                     }
                     hadSlash = false;
                     out.write(c);
                     inString = true;
                     break;
-                case '#':
+                case '#'://tested
                     if (defines == null) {          //untested for true --> now testet
                         throw new ImagingException("Unexpected preprocessor directive");
                     }
                     inDirective = true;
                     break;
-                default:
-                    if (hadSlash) {
+                default://tested
+                    if (hadSlash) {                         //untested
                         out.write('/');
                     }
                     hadSlash = false;
                     out.write(c);
                     // Only whitespace allowed before first comment:
-                    if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+                    if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {//tested
                         seenFirstComment = true;
                     }
                     break;
                 }
             }
         }
-        if (hadSlash) {
+        if (hadSlash) {                         //untested
             out.write('/');
         }
-        if (hadStar) {
+        if (hadStar) {                         //untested
             out.write('*');
         }
         if (inString) {             //untested for true --> now tested
