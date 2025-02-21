@@ -46,6 +46,15 @@ public class DIYBranchCoverage {
         result.put("coverage", (double) executedBranches / branchCnt * 100 + "%");
     }
 
+    public static void readResult() {
+        try {
+            result = new JSONObject(FileUtils.readFileToString(new File(resultPath), "UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            initResult();
+        }
+    }
+
     public static void writeResult() {
         calculateCoverage();
         try {

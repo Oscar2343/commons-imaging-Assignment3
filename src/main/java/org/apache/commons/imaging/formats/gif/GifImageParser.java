@@ -842,7 +842,7 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
     @Override
     public void writeImage(final BufferedImage src, final OutputStream os, GifImagingParameters params) throws ImagingException, IOException {
         // initialize the branch test coverage result
-        DIYBranchCoverage.initResult();
+        DIYBranchCoverage.readResult();
         DIYBranchCoverage.trackBranch(0);
 
         if (params == null) {

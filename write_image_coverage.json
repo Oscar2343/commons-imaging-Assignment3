@@ -1,6 +1,6 @@
 {
-    "executedBranches": 13,
-    "coverage": "43.333333333333336%",
+    "executedBranches": 24,
+    "coverage": "80.0%",
     "totalBranches": 30,
     "branches": [
         {
@@ -17,7 +17,7 @@
         },
         {
             "index": 3,
-            "executed": false
+            "executed": true
         },
         {
             "index": 4,
@@ -37,27 +37,27 @@
         },
         {
             "index": 8,
-            "executed": false
+            "executed": true
         },
         {
             "index": 9,
-            "executed": false
+            "executed": true
         },
         {
             "index": 10,
-            "executed": false
+            "executed": true
         },
         {
             "index": 11,
-            "executed": false
+            "executed": true
         },
         {
             "index": 12,
-            "executed": false
+            "executed": true
         },
         {
             "index": 13,
-            "executed": false
+            "executed": true
         },
         {
             "index": 14,
@@ -69,11 +69,11 @@
         },
         {
             "index": 16,
-            "executed": false
+            "executed": true
         },
         {
             "index": 17,
-            "executed": false
+            "executed": true
         },
         {
             "index": 18,
@@ -117,11 +117,11 @@
         },
         {
             "index": 28,
-            "executed": false
+            "executed": true
         },
         {
             "index": 29,
-            "executed": false
+            "executed": true
         }
     ]
 }
