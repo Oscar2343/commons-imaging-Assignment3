@@ -90,6 +90,28 @@
   <build>
     <defaultGoal>clean verify apache-rat:check checkstyle:check spotbugs:check javadoc:javadoc</defaultGoal>
     <plugins>
+
+      <plugin>
+        <groupId>org.openclover</groupId>
+        <artifactId>clover-maven-plugin</artifactId>
+        <version>4.2.1</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.openclover</groupId>
+        <artifactId>clover-maven-plugin</artifactId>
+        <version>4.2.1</version>
+      </plugin>
+      <plugin>
+            <groupId>org.openclover</groupId>
+            <artifactId>clover-maven-plugin</artifactId>
+            <version>4.5.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.openclover</groupId>
+        <artifactId>clover-maven-plugin</artifactId>
+        <version>4.4.1</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -156,6 +178,19 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.openclover</groupId>
+        <artifactId>clover-maven-plugin</artifactId>
+        <version>4.5.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>16</source>
+          <target>16</target>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -201,6 +236,7 @@
               <exclude>src/test/**/*.hdr</exclude>
               <exclude>src/main/resources/org/apache/commons/imaging/formats/xpm/rgb.txt</exclude>
               <exclude> src/test/java/org/apache/commons/imaging/roundtrip/ExtendedColorRoundtripTest.java</exclude>
+              <exclude>src/main/resources/org/apache/commons/imaging/formats/jpeg/JpegImageParserBranchCoverage.txt</exclude>
               <exclude>.asf.yaml</exclude>
             </excludes>
           </configuration>
@@ -246,6 +282,18 @@
       <version>3.17.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.8.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>5.8.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <reporting>
     <plugins>
@@ -259,7 +307,10 @@
           </reportSet>
         </reportSets>
       </plugin>
-      <!-- Requires setting 'export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m" ' -->
+      <
+      
+      
+      -- Requires setting 'export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m" ' -->
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
