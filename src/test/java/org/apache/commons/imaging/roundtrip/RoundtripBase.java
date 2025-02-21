@@ -28,10 +28,12 @@ import org.apache.commons.imaging.AbstractImageParser;
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.ImagingParameters;
 import org.apache.commons.imaging.common.RgbBufferedImageFactory;
+import org.apache.commons.imaging.formats.gif.GifImagingParameters;
 import org.apache.commons.imaging.internal.ImageParserFactory;
 import org.junit.jupiter.params.provider.Arguments;
 
 public class RoundtripBase {
+    private static boolean hasXmpData = false;
 
     public static Stream<Arguments> createRoundtripArguments(final BufferedImage[] images) {
         return Stream.of(images).flatMap(i -> Stream.of(FormatInfo.READ_WRITE_FORMATS).map(f -> Arguments.of(i, f)));
@@ -43,6 +45,21 @@ public class RoundtripBase {
         final AbstractImageParser abstractImageParser = ImageParserFactory.getImageParser(formatInfo.format);
 
         final ImagingParameters params = ImageParserFactory.getImageParser(formatInfo.format).getDefaultParameters();
+
+        if (!hasXmpData && params instanceof GifImagingParameters) {
+            hasXmpData = true;
+            String xmpData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">\n" +
+                    "   <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n" +
+                    "       <rdf:Description rdf:about=\"\"\n" +
+                    "           xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\">\n" +
+                    "           <xmp:CreatorTool>My GIF Creator</xmp:CreatorTool>\n" +
+                    "       </rdf:Description>\n" +
+                    "   </rdf:RDF>\n" +
+                    "</x:xmpmeta>";
+            ((GifImagingParameters) params).setXmpXml(xmpData);
+        }
+
         final byte[] temp1;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             abstractImageParser.writeImage(testImage, bos, params);
