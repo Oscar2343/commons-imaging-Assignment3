@@ -246,7 +246,7 @@ public class BasicCParser {
                     out.write('"');
                     break;
                 case '\r':
-                case '\n':
+                case '\n':                      //untested for true --> now testet
                     throw new ImagingException("Unterminated string in file");
                 default:
                     if (hadBackSlash) {
@@ -304,7 +304,7 @@ public class BasicCParser {
                     inString = true;
                     break;
                 case '#':
-                    if (defines == null) {
+                    if (defines == null) {          //untested for true --> now testet
                         throw new ImagingException("Unexpected preprocessor directive");
                     }
                     inDirective = true;
@@ -329,10 +329,10 @@ public class BasicCParser {
         if (hadStar) {
             out.write('*');
         }
-        if (inString) {
+        if (inString) {             //untested for true --> now tested
             throw new ImagingException("Unterminated string at the end of file");
         }
-        if (inComment) {
+        if (inComment) {            //untested for true --> now testet
             throw new ImagingException("Unterminated comment at the end of file");
         }
         return out;
