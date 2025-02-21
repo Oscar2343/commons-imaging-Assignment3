@@ -713,7 +713,7 @@ public final class Imaging {
      */
     public static ImageFormat guessFormat(final ByteSource byteSource) throws IOException {
         if (byteSource == null) {
-            branchCoverage.put(1, true);
+            branchCoverage.put(1, true); // was untested -> now tested
             return ImageFormats.UNKNOWN;
         }
 
@@ -721,7 +721,7 @@ public final class Imaging {
             final int i1 = is.read();
             final int i2 = is.read();
             if (i1 < 0 || i2 < 0) {
-                branchCoverage.put(2, true);
+                branchCoverage.put(2, true); // was untested -> now tested
                 throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
             }
             branchCoverage.put(3, true);
@@ -765,7 +765,7 @@ public final class Imaging {
                 return ImageFormats.PAM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PBM_A, bytePair)) {
-                branchCoverage.put(12, true);
+                branchCoverage.put(12, true); // untested
                 return ImageFormats.PBM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PBM_B, bytePair)) {
@@ -773,7 +773,7 @@ public final class Imaging {
                 return ImageFormats.PBM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PGM_A, bytePair)) {
-                branchCoverage.put(14, true);
+                branchCoverage.put(14, true); // untested
                 return ImageFormats.PGM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PGM_B, bytePair)) {
@@ -781,7 +781,7 @@ public final class Imaging {
                 return ImageFormats.PGM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PPM_A, bytePair)) {
-                branchCoverage.put(16, true);
+                branchCoverage.put(16, true); // untested
                 return ImageFormats.PPM;
             }
             if (compareBytePair(MAGIC_NUMBERS_PPM_B, bytePair)) {
@@ -789,19 +789,19 @@ public final class Imaging {
                 return ImageFormats.PPM;
             }
             if (compareBytePair(MAGIC_NUMBERS_JBIG2_1, bytePair)) {
-                branchCoverage.put(18, true);
+                branchCoverage.put(18, true); // was untested -> now tested
                 final int i3 = is.read();
                 final int i4 = is.read();
                 if (i3 < 0 || i4 < 0) {
-                    branchCoverage.put(19, true);
+                    branchCoverage.put(19, true); // was untested -> now tested
                     throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                 }
-                branchCoverage.put(20, true);
+                branchCoverage.put(20, true); // untested
                 final int b3 = i3 & 0xff;
                 final int b4 = i4 & 0xff;
                 final int[] bytePair2 = { b3, b4, };
                 if (compareBytePair(MAGIC_NUMBERS_JBIG2_2, bytePair2)) {
-                    branchCoverage.put(21, true);
+                    branchCoverage.put(21, true); // untested
                     return ImageFormats.JBIG2;
                 }
             } else if (compareBytePair(MAGIC_NUMBERS_ICNS, bytePair)) {
@@ -818,7 +818,7 @@ public final class Imaging {
                 final int i3 = is.read();
                 final int i4 = is.read();
                 if (i3 < 0 || i4 < 0) {
-                    branchCoverage.put(26, true);
+                    branchCoverage.put(26, true); // untested
                     throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                 }
                 branchCoverage.put(27, true);
@@ -829,7 +829,7 @@ public final class Imaging {
                     branchCoverage.put(28, true);
                     final byte[] bytes = new byte[4];
                     if (is.read(bytes) < 4) { // Skip file size
-                        branchCoverage.put(29, true);
+                        branchCoverage.put(29, true); // was untested -> now tested
                         throw new IllegalArgumentException("Couldn't read magic numbers to guess format.");
                     }
 
