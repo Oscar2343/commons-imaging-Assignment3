@@ -18,12 +18,17 @@
 package org.apache.commons.imaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.apache.commons.imaging.bytesource.ByteSource;
 import org.apache.commons.io.FilenameUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -68,6 +73,55 @@ public class ImagingGuessFormatTest extends AbstractImagingTest {
 
         final ImageFormat guessedFormat = Imaging.guessFormat(imageFile);
         assertEquals(expectedFormat, guessedFormat);
+    }
+
+    /**
+     * Test case for byteSource == null.
+     */
+    @Test
+    void testNullByteSource() throws IOException {
+        ByteSource nullByteSource = null;
+        ImageFormat result = Imaging.guessFormat(nullByteSource);
+        assertEquals(ImageFormats.UNKNOWN, result, "Null input should return UNKNOWN format.");
+    }
+
+    /**
+     * Test case for empty input.
+     */
+    @Test
+    void testEmptyInputStream() {
+        ByteSource emptyByteSource = ByteSource.inputStream(new ByteArrayInputStream(new byte[0]), "empty.dat");
+        Exception exception = assertThrows(IllegalArgumentException.class, 
+            () -> Imaging.guessFormat(emptyByteSource), "Empty input should throw an IllegalArgumentException.");
+        
+        assertEquals("Couldn't read magic numbers to guess format.", exception.getMessage(),
+            "Exception message should match expected error.");
+    }
+
+    /**
+     * Test case for a JBIG2 when the first magic numbers match but checks for i3 and i4 fail.
+     */
+    @Test
+    void testGuessFormatWithJBIG2() throws IOException {
+        byte[] jbig2Header = new byte[]{(byte) 0x97, (byte) 0x4A}; // JBIG2 first magic number
+        ByteSource jbig2ByteSource = ByteSource.inputStream(new ByteArrayInputStream(jbig2Header), "test.jbig2");
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            Imaging.guessFormat(jbig2ByteSource);
+        });
+        assertEquals("Couldn't read magic numbers to guess format.", exception.getMessage());
+    }
+
+    /**
+     * Test case for a corrupt RIFF file.
+     */
+    @Test
+    void testGuessFormatWithCorruptRIFF() throws IOException {
+        byte[] corruptRIFFHeader = new byte[]{'R', 'I', 'F', 'F', 0x00, 0x00}; // shortened RIFF
+        ByteSource riffByteSource = ByteSource.inputStream(new ByteArrayInputStream(corruptRIFFHeader), "test.riff");
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            Imaging.guessFormat(riffByteSource);
+        });
+        assertEquals("Couldn't read magic numbers to guess format.", exception.getMessage());
     }
 
 }
