@@ -18,7 +18,7 @@ package org.apache.commons.imaging.roundtrip;
 
 import java.awt.image.BufferedImage;
 
-final class TestImages {
+public final class TestImages {
 
     static BufferedImage createArgbBitmapImage(final int width, final int height) {
         final BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -98,6 +98,23 @@ final class TestImages {
         }
         return result;
     }
+
+    public static BufferedImage createExtendedColorImage(final int width, final int height, final int colorCount) {
+        final int[] colors = new int[colorCount];
+        for (int i = 0; i < colorCount; i++) {
+            colors[i] = 0xFF000000 | (i * 37 % 256) << 16 | (i * 59 % 256) << 8 | (i * 83 % 256);
+        }
+
+        final BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                final int argb = colors[(x + y) % colors.length];
+                result.setRGB(x, y, argb);
+            }
+        }
+        return result;
+    }
+
 
     private TestImages() {
     }
