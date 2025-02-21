@@ -1,0 +1,77 @@
+Branch Coverage Report:
+Function preprocess in BasicCParser:
+branch 1 taken 
+branch 2 taken 
+branch 3 not taken
+branch 4 taken 
+branch 5 taken 
+branch 6 taken 
+branch 7 not taken
+branch 8 not taken
+branch 9 taken 
+branch 10 not taken
+branch 11 taken 
+branch 12 taken 
+branch 13 not taken
+branch 14 not taken
+branch 15 not taken
+branch 16 not taken
+branch 17 not taken
+branch 18 not taken
+branch 19 not taken
+branch 20 not taken
+branch 21 not taken
+branch 22 not taken
+branch 23 not taken
+branch 24 not taken
+branch 25 not taken
+branch 26 not taken
+branch 27 taken 
+branch 28 not taken
+branch 29 not taken
+branch 30 not taken
+branch 31 taken 
+branch 32 not taken
+branch 33 taken 
+branch 34 not taken
+branch 35 not taken
+branch 36 taken 
+branch 37 not taken
+branch 38 taken 
+branch 39 taken 
+branch 40 taken 
+branch 41 not taken
+branch 42 taken 
+branch 43 not taken
+branch 44 taken 
+branch 45 taken 
+branch 46 not taken
+branch 47 taken 
+branch 48 not taken
+branch 49 taken 
+branch 50 taken 
+branch 51 taken 
+branch 52 taken 
+branch 53 not taken
+branch 54 not taken
+branch 55 not taken
+branch 56 taken 
+branch 57 not taken
+branch 58 taken 
+branch 59 taken 
+branch 60 not taken
+branch 61 taken 
+branch 62 taken 
+branch 63 not taken
+branch 64 taken 
+branch 65 taken 
+branch 66 taken 
+branch 67 not taken
+branch 68 taken 
+branch 69 not taken
+branch 70 taken 
+branch 71 not taken
+branch 72 taken 
+branch 73 not taken
+branch 74 taken 
+Final branch coverage is 47.2972972972973 for function preprocess

@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.Map;
 
+import org.apache.commons.imaging.Coverage;
 import org.apache.commons.imaging.ImagingException;
 
 /**
@@ -172,168 +173,258 @@ public class BasicCParser {
         final StringBuilder directiveBuffer = new StringBuilder();
         for (int c = is.read(); c != -1; c = is.read()) {
             if (inComment) {
+                Coverage.coverageMap.put(1, true);
                 if (c == '*') {
+                    Coverage.coverageMap.put(2, true);
                     if (hadStar && !seenFirstComment) {
+                        Coverage.coverageMap.put(3, true);
                         firstComment.append('*');
+                    }else{
+                        Coverage.coverageMap.put(4, true);
                     }
                     hadStar = true;
                 } else if (c == '/') {
+                    Coverage.coverageMap.put(5, true);
                     if (hadStar) {
+                        Coverage.coverageMap.put(6, true);
                         hadStar = false;
                         inComment = false;
                         seenFirstComment = true;
                     } else if (!seenFirstComment) {
+                        Coverage.coverageMap.put(7, true);
                         firstComment.append((char) c);
+                    }else{
+                        Coverage.coverageMap.put(8, true);
                     }
                 } else {
+                    Coverage.coverageMap.put(9, true);
                     if (hadStar && !seenFirstComment) {
+                        Coverage.coverageMap.put(10, true);
                         firstComment.append('*');
+                    }else{
+                        Coverage.coverageMap.put(11, true);
                     }
                     hadStar = false;
                     if (!seenFirstComment) {
+                        Coverage.coverageMap.put(12, true);
                         firstComment.append((char) c);
+                    }else{
+                        Coverage.coverageMap.put(13, true);
                     }
                 }
             } else if (inSingleQuotes) {
+                Coverage.coverageMap.put(14, true);
                 switch (c) {
                 case '\\':
+                    Coverage.coverageMap.put(15, true);
                     if (hadBackSlash) {
+                        Coverage.coverageMap.put(16, true);
                         out.write('\\');
                         out.write('\\');
                         hadBackSlash = false;
                     } else {
+                        Coverage.coverageMap.put(17, true);
                         hadBackSlash = true;
                     }
                     break;
                 case '\'':
+                    Coverage.coverageMap.put(18, true);
                     if (hadBackSlash) {
+                        Coverage.coverageMap.put(19, true);
                         out.write('\\');
                         hadBackSlash = false;
                     } else {
+                        Coverage.coverageMap.put(20, true);
                         inSingleQuotes = false;
                     }
                     out.write('\'');
                     break;
                 case '\r':
+                    Coverage.coverageMap.put(21, true);
                 case '\n':
+                    Coverage.coverageMap.put(22, true);
                     throw new ImagingException("Unterminated single quote in file");
                 default:
+                    Coverage.coverageMap.put(23, true);
                     if (hadBackSlash) {
+                        Coverage.coverageMap.put(24, true);
                         out.write('\\');
                         hadBackSlash = false;
+                    }else{
+                        Coverage.coverageMap.put(25, true);
                     }
                     out.write(c);
                     break;
                 }
             } else if (inString) {
+                Coverage.coverageMap.put(27, true);
                 switch (c) {
                 case '\\':
+                    Coverage.coverageMap.put(28, true);
                     if (hadBackSlash) {
+                        Coverage.coverageMap.put(29, true);
                         out.write('\\');
                         out.write('\\');
                         hadBackSlash = false;
                     } else {
+                        Coverage.coverageMap.put(30, true);
                         hadBackSlash = true;
                     }
                     break;
                 case '"':
+                    Coverage.coverageMap.put(31, true);
                     if (hadBackSlash) {
+                        Coverage.coverageMap.put(32, true);
                         out.write('\\');
                         hadBackSlash = false;
                     } else {
+                        Coverage.coverageMap.put(33, true);
                         inString = false;
                     }
                     out.write('"');
                     break;
                 case '\r':
+                    Coverage.coverageMap.put(34, true);
                 case '\n':
+                    Coverage.coverageMap.put(35, true);
                     throw new ImagingException("Unterminated string in file");
                 default:
+                    Coverage.coverageMap.put(36, true);
                     if (hadBackSlash) {
+                        Coverage.coverageMap.put(37, true);
                         out.write('\\');
                         hadBackSlash = false;
+                    }else{
+                        Coverage.coverageMap.put(38, true);
                     }
                     out.write(c);
                     break;
                 }
             } else if (inDirective) {
+                Coverage.coverageMap.put(39, true);
                 if (c == '\r' || c == '\n') {
+                    Coverage.coverageMap.put(40, true);
                     inDirective = false;
                     final String[] tokens = tokenizeRow(directiveBuffer.toString());
                     if (tokens.length < 2 || tokens.length > 3) {
+                        Coverage.coverageMap.put(41, true);
                         throw new ImagingException("Bad preprocessor directive");
+                    }else{
+                        Coverage.coverageMap.put(42, true);
                     }
                     if (!tokens[0].equals("define")) {
+                        Coverage.coverageMap.put(43, true);
                         throw new ImagingException("Invalid/unsupported " + "preprocessor directive '" + tokens[0] + "'");
+                    }else{
+                        Coverage.coverageMap.put(44, true);
                     }
                     defines.put(tokens[1], tokens.length == 3 ? tokens[2] : null);
                     directiveBuffer.setLength(0);
                 } else {
+                    Coverage.coverageMap.put(45, true);
                     directiveBuffer.append((char) c);
                 }
             } else {
+                Coverage.coverageMap.put(47, true);
                 switch (c) {
                 case '/':
                     if (hadSlash) {
+                        Coverage.coverageMap.put(48, true);
                         out.write('/');
+                    }else{
+                        Coverage.coverageMap.put(49, true);
                     }
                     hadSlash = true;
                     break;
                 case '*':
+                    Coverage.coverageMap.put(50, true);
                     if (hadSlash) {
+                        Coverage.coverageMap.put(51, true);
                         inComment = true;
                         hadSlash = false;
                     } else {
+                        Coverage.coverageMap.put(52, true);
                         out.write(c);
                     }
                     break;
                 case '\'':
+                    Coverage.coverageMap.put(53, true);
                     if (hadSlash) {
+                        Coverage.coverageMap.put(54, true);
                         out.write('/');
+                    }else{
+                        Coverage.coverageMap.put(55, true);
                     }
                     hadSlash = false;
                     out.write(c);
                     inSingleQuotes = true;
                     break;
                 case '"':
+                    Coverage.coverageMap.put(56, true);
                     if (hadSlash) {
+                        Coverage.coverageMap.put(57, true);
                         out.write('/');
+                    }else{
+                        Coverage.coverageMap.put(58, true);
                     }
                     hadSlash = false;
                     out.write(c);
                     inString = true;
                     break;
                 case '#':
+                    Coverage.coverageMap.put(59, true);
                     if (defines == null) {
+                        Coverage.coverageMap.put(60, true);
                         throw new ImagingException("Unexpected preprocessor directive");
+                    }else{
+                        Coverage.coverageMap.put(61, true);
                     }
                     inDirective = true;
                     break;
                 default:
+                    Coverage.coverageMap.put(62, true);
                     if (hadSlash) {
+                        Coverage.coverageMap.put(63, true);
                         out.write('/');
+                    }else{
+                        Coverage.coverageMap.put(64, true);
                     }
                     hadSlash = false;
                     out.write(c);
                     // Only whitespace allowed before first comment:
                     if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+                        Coverage.coverageMap.put(65, true);
                         seenFirstComment = true;
+                    }else{
+                        Coverage.coverageMap.put(66, true);
                     }
                     break;
                 }
             }
         }
         if (hadSlash) {
+            Coverage.coverageMap.put(67, true);
             out.write('/');
+        }else{
+            Coverage.coverageMap.put(68, true);
         }
         if (hadStar) {
+            Coverage.coverageMap.put(69, true);
             out.write('*');
+        }else{
+            Coverage.coverageMap.put(70, true);
         }
         if (inString) {
+            Coverage.coverageMap.put(71, true);
             throw new ImagingException("Unterminated string at the end of file");
+        }else{
+            Coverage.coverageMap.put(72, true);
         }
         if (inComment) {
+            Coverage.coverageMap.put(73, true);
             throw new ImagingException("Unterminated comment at the end of file");
+        }else{
+            Coverage.coverageMap.put(74, true);
         }
         return out;
     }
