@@ -9,7 +9,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_2Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(10, 10, 2);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
 
@@ -19,7 +19,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_4Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(10, 10, 4);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
@@ -30,7 +30,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_8Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(10, 10, 8);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
@@ -41,7 +41,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_16Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(20, 20, 16);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
@@ -52,7 +52,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_32Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(20, 20, 32);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
@@ -63,7 +63,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_64Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(30, 30, 64);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
@@ -74,7 +74,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_128Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(50, 50, 128);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
@@ -85,7 +85,7 @@ public class ExtendedColorRoundtripTest extends RoundtripBase {
     @Test
     public void testExtendedColorImage_200Colors() throws Exception {
         BufferedImage testImage = TestImages.createExtendedColorImage(100, 100, 200);
-        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[0];
+        FormatInfo formatInfo = FormatInfo.READ_WRITE_FORMATS[1];
 
         boolean imageExact = formatInfo.colorSupport != FormatInfo.COLOR_BITMAP
                 && formatInfo.colorSupport != FormatInfo.COLOR_GRAYSCALE;
