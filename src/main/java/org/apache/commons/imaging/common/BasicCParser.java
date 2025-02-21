@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.imaging.ImagingException;
@@ -31,6 +32,8 @@ import org.apache.commons.imaging.ImagingException;
  * FIXME replace this by a parser generated via ANTLR (if we really need it?!)
  */
 public class BasicCParser {
+
+    public static final HashMap<String, Boolean> Types = new HashMap<>();
     /**
      * Parses the hexadecimal-base escape-sequence found at index {@code i} of {@code string}.
      *
@@ -158,185 +161,243 @@ public class BasicCParser {
 
     }
 
-    public static ByteArrayOutputStream preprocess(final InputStream is, final StringBuilder firstComment, final Map<String, String> defines)
-            throws IOException, ImagingException {
-        boolean inSingleQuotes = false;
-        boolean inString = false;
-        boolean inComment = false;
-        boolean inDirective = false;
-        boolean hadSlash = false;
-        boolean hadStar = false;
-        boolean hadBackSlash = false;
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        boolean seenFirstComment = firstComment == null;
-        final StringBuilder directiveBuffer = new StringBuilder();
-        for (int c = is.read(); c != -1; c = is.read()) {      
-            if (inComment) {//tested                    
-                if (c == '*') {//tested
-                    if (hadStar && !seenFirstComment) {        //untested
-                        firstComment.append('*');
-                    }
-                    hadStar = true;
-                } else if (c == '/') {  //tested    
-                    if (hadStar) {          //untested
-                        hadStar = false;
-                        inComment = false;
-                        seenFirstComment = true;
-                    } else if (!seenFirstComment) {          //untested
-                        firstComment.append((char) c);
-                    }
-                } else {//tested
-                    if (hadStar && !seenFirstComment) {
-                        firstComment.append('*');
-                    }
-                    hadStar = false;
-                    if (!seenFirstComment) {//tested
-                        firstComment.append((char) c);
-                    }
-                }
-            } else if (inSingleQuotes) {              //untested
-                switch (c) {
-                case '\\':                          //untested
-                    if (hadBackSlash) {          //untested
-                        out.write('\\');
-                        out.write('\\');
-                        hadBackSlash = false;
-                    } else {                          //untested
-                        hadBackSlash = true;
-                    }
-                    break;
-                case '\'':                         //untested
-                    if (hadBackSlash) {                         //untested
-                        out.write('\\');
-                        hadBackSlash = false;
-                    } else {                         //untested
-                        inSingleQuotes = false;
-                    }
-                    out.write('\'');
-                    break;
-                case '\r':                         //untested
-                case '\n':                         //untested
-                    throw new ImagingException("Unterminated single quote in file");
-                default:                         //untested
-                    if (hadBackSlash) {                         //untested
-                        out.write('\\');
-                        hadBackSlash = false;
-                    }
-                    out.write(c);
-                    break;
-                }
-            } else if (inString) {//tested
-                switch (c) {
-                case '\\':                         //untested
-                    if (hadBackSlash) {                         //untested
-                        out.write('\\');
-                        out.write('\\');
-                        hadBackSlash = false;
-                    } else {                         //untested
-                        hadBackSlash = true;
-                    }
-                    break;
-                case '"':
-                    if (hadBackSlash) {                         //untested
-                        out.write('\\');
-                        hadBackSlash = false;
-                    } else {//tested
-                        inString = false;
-                    }
-                    out.write('"');
-                    break;
-                case '\r':                         //untested
-                case '\n':                      //untested for true --> now testet
-                    throw new ImagingException("Unterminated string in file");
-                default://tested
-                    if (hadBackSlash) {//tested
-                        out.write('\\');
-                        hadBackSlash = false;
-                    }
-                    out.write(c);
-                    break;
-                }
-            } else if (inDirective) {//tested
-                if (c == '\r' || c == '\n') {//tested
-                    inDirective = false;
-                    final String[] tokens = tokenizeRow(directiveBuffer.toString());
-                    if (tokens.length < 2 || tokens.length > 3) {                         //untested
-                        throw new ImagingException("Bad preprocessor directive");
-                    }
-                    if (!tokens[0].equals("define")) {                         //untested
-                        throw new ImagingException("Invalid/unsupported " + "preprocessor directive '" + tokens[0] + "'");
-                    }
-                    defines.put(tokens[1], tokens.length == 3 ? tokens[2] : null);
-                    directiveBuffer.setLength(0);
-                } else {//tested
-                    directiveBuffer.append((char) c);
-                }
-            } else {//tested
-                switch (c) {
-                case '/'://tested
-                    if (hadSlash) {                         //untested
-                        out.write('/');
-                    }
-                    hadSlash = true;
-                    break;
-                case '*'://tested
-                    if (hadSlash) {//tested
-                        inComment = true;
-                        hadSlash = false;
-                    } else {//tested
-                        out.write(c);
-                    }
-                    break;
-                case '\'':                         //untested
-                    if (hadSlash) {                         //untested
-                        out.write('/');
-                    }
-                    hadSlash = false;
-                    out.write(c);
-                    inSingleQuotes = true;
-                    break;
-                case '"'://tested
-                    if (hadSlash) {                         //untested
-                        out.write('/');
-                    }
-                    hadSlash = false;
-                    out.write(c);
-                    inString = true;
-                    break;
-                case '#'://tested
-                    if (defines == null) {          //untested for true --> now testet
-                        throw new ImagingException("Unexpected preprocessor directive");
-                    }
-                    inDirective = true;
-                    break;
-                default://tested
-                    if (hadSlash) {                         //untested
-                        out.write('/');
-                    }
-                    hadSlash = false;
-                    out.write(c);
-                    // Only whitespace allowed before first comment:
-                    if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {//tested
-                        seenFirstComment = true;
-                    }
-                    break;
-                }
+    public static void preprocessinComment(int c, final ByteArrayOutputStream out,final StringBuilder firstComment  ){
+
+        if (c == '*') {//tested
+            if (Types.get("hadStar") && !Types.get("seenFirstComment")) {        //untested
+                firstComment.append('*');
+            }
+            Types.put("hadStar",true);
+        } else if (c == '/') {//tested
+            if (Types.get("hadStar")) {          //untested
+                Types.put("hadStar",false);
+                Types.put("inComment",false);
+                Types.put("seenFirstComment",true);
+            } else if (!Types.get("seenFirstComment")) {          //untested
+                firstComment.append((char) c);
+            }
+        } else {//tested
+            if (Types.get("hadStar") && !Types.get("seenFirstComment")) {
+                firstComment.append('*');
+            }
+            Types.put("hadStar",false);
+            if (!Types.get("seenFirstComment")) {//tested
+                firstComment.append((char) c);
             }
         }
-        if (hadSlash) {                         //untested
+    }
+
+    public static void preprocessinString(int c, final ByteArrayOutputStream out,final StringBuilder firstComment  )
+    throws IOException, ImagingException{
+        switch (c) {
+            case '\\':          //untested
+                if (Types.get("hadBackSlash")) {          //untested
+                    out.write('\\');
+                    out.write('\\');
+                    Types.put("hadBackSlash",false);
+                } else {          //untested
+                    Types.put("hadBackSlash",true);
+                }
+                break;
+            case '"':
+                if (Types.get("hadBackSlash")) {          //untested
+                    out.write('\\');
+                    Types.put("hadBackSlash",false);
+                } else {//tested
+                    Types.put("inString",false);
+                }
+                out.write('"');
+                break;
+            case '\r':          //untested
+            case '\n':                      //untested for true --> now testet
+                throw new ImagingException("Unterminated string in file");
+            default://tested
+                if (Types.get("hadBackSlash")) {//tested
+                    out.write('\\');
+                    Types.put("hadBackSlash",false);
+                }
+                out.write(c);
+                break;
+            }
+
+    }
+
+    public static void preprocessinDirective(int c, final ByteArrayOutputStream out,final StringBuilder firstComment , final StringBuilder directiveBuffer, final Map<String, String> defines )
+    throws IOException, ImagingException{
+        if (c == '\r' || c == '\n') {//tested
+            Types.put("inDirective",false);
+            final String[] tokens = tokenizeRow(directiveBuffer.toString());
+            if (tokens.length < 2 || tokens.length > 3) {                         //untested
+                throw new ImagingException("Bad preprocessor directive");
+            }
+            if (!tokens[0].equals("define")) {                         //untested
+                throw new ImagingException("Invalid/unsupported " + "preprocessor directive '" + tokens[0] + "'");
+            }
+            defines.put(tokens[1], tokens.length == 3 ? tokens[2] : null);
+            directiveBuffer.setLength(0);
+        } else {//tested
+            directiveBuffer.append((char) c);
+        }
+
+    }
+
+    public static void preprocessinSingleQuotes(int c, final ByteArrayOutputStream out,final StringBuilder firstComment  )
+    throws IOException, ImagingException{
+
+        switch (c) {
+            case '\\':          //untested
+                if (Types.get("hadBackSlash")) {          //untested
+                    out.write('\\');
+                    out.write('\\');
+                    Types.put("hadBackSlash",false);
+                } else {          //untested
+                    Types.put("hadBackSlash",true);
+                }
+                break;
+            case '\'':          //untested
+                if (Types.get("hadBackSlash")) {          //untested
+                    out.write('\\');
+                    Types.put("hadBackSlash",false);
+                } else {          //untested
+                    Types.put("inSingleQuotes",false);
+                }
+                out.write('\'');
+                break;
+            case '\r':          //untested
+            case '\n':          //untested
+                throw new ImagingException("Unterminated single quote in file");
+            default:          //untested
+                if (Types.get("hadBackSlash")) {          //untested
+                    out.write('\\');
+                    Types.put("hadBackSlash",false);
+                }
+                out.write(c);
+                break;
+            }
+    }
+        
+
+    public static void preprocessHelper(int c, final ByteArrayOutputStream out,final StringBuilder firstComment,final Map<String, String> defines)
+    throws IOException, ImagingException{
+        switch (c) {
+            case '/'://tested
+                if (Types.get("hadSlash")) {                         //untested
+                    out.write('/');
+                }
+                Types.put("hadSlash",true);
+                break;
+            case '*'://tested
+                if (Types.get("hadSlash")) {//tested
+                    Types.put("inComment",true);
+                    Types.put("hadSlash",false);
+                } else {//tested
+                    out.write(c);
+                }
+                break;
+            case '\'':                         //untested
+                if (Types.get("hadSlash")) {                         //untested
+                    out.write('/');
+                }
+                Types.put("hadSlash",false);
+                out.write(c);
+                Types.put("inSingleQuotes",true);
+                break;
+            case '"'://tested
+                if (Types.get("hadSlash")) {                         //untested
+                    out.write('/');
+                }
+                Types.put("hadSlash",false);
+                out.write(c);
+                Types.put("inString",true);
+                break;
+            case '#'://tested
+                if (defines == null) {          //untested for true --> now testet
+                    throw new ImagingException("Unexpected preprocessor directive");
+                }
+                Types.put("inDirective",true);
+                break;
+            default://tested
+                if (Types.get("hadSlash")) {                         //untested
+                    out.write('/');
+                }
+                Types.put("hadSlash",false);
+                out.write(c);
+                // Only whitespace allowed before first comment:
+                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {//tested
+                    Types.put("seenFirstComment",true);
+                }
+                break;
+            }
+    }
+
+
+
+    public static ByteArrayOutputStream preprocess(final InputStream is, final StringBuilder firstComment, final Map<String, String> defines)
+        throws IOException, ImagingException {
+
+
+
+        Types.put("inSingleQuotes", false);
+        Types.put("inString", false);
+        Types.put("inComment", false);
+        Types.put("inDirective", false);
+        Types.put("hadSlash", false);
+        Types.put("hadStar", false);
+        Types.put("hadBackSlash", false);
+        Types.put("seenFirstComment", firstComment == null);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final StringBuilder directiveBuffer = new StringBuilder();
+
+
+        for (int c = is.read(); c != -1; c = is.read()) {
+            if (Types.get("inComment")) {//tested
+                preprocessinComment(c,out, firstComment);
+                
+            } else if (Types.get("inSingleQuotes")) {           //untested
+                try {
+                    preprocessinSingleQuotes(c,out, firstComment);
+                } catch (ImagingException e) {
+                    throw e;
+                }
+                
+            } else if (Types.get("inString")) {//tested
+                try {
+                    preprocessinString(c,out, firstComment);
+                } catch (ImagingException e) {
+                    throw e;
+                }
+                
+            } else if (Types.get("inDirective")) {//tested
+                try {
+                    preprocessinDirective(c,out, firstComment, directiveBuffer, defines);
+                } catch (ImagingException e) {
+                    throw e;
+                }
+                
+            } else {//tested
+                try {
+                    preprocessHelper(c,out, firstComment,defines);
+                } catch (ImagingException e) {
+                    throw e;
+                }
+                
+                
+            }
+        }
+        if (Types.get("hadSlash")) {                         //untested
             out.write('/');
         }
-        if (hadStar) {                         //untested
+        if (Types.get("hadStar")) {                         //untested
             out.write('*');
         }
-        if (inString) {             //untested for true --> now tested
+        if (Types.get("inString")) {             //untested for true --> now tested
             throw new ImagingException("Unterminated string at the end of file");
         }
-        if (inComment) {            //untested for true --> now testet
+        if (Types.get("inComment")) {            //untested for true --> now testet
             throw new ImagingException("Unterminated comment at the end of file");
         }
         return out;
-    }
+    }       
 
     public static String[] tokenizeRow(final String row) {
         final String[] tokens = row.split("[ \t]");
