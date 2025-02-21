@@ -1,0 +1,127 @@
+{
+    "executedBranches": 13,
+    "coverage": "43.333333333333336%",
+    "totalBranches": 30,
+    "branches": [
+        {
+            "index": 0,
+            "executed": true
+        },
+        {
+            "index": 1,
+            "executed": true
+        },
+        {
+            "index": 2,
+            "executed": true
+        },
+        {
+            "index": 3,
+            "executed": false
+        },
+        {
+            "index": 4,
+            "executed": false
+        },
+        {
+            "index": 5,
+            "executed": false
+        },
+        {
+            "index": 6,
+            "executed": false
+        },
+        {
+            "index": 7,
+            "executed": true
+        },
+        {
+            "index": 8,
+            "executed": false
+        },
+        {
+            "index": 9,
+            "executed": false
+        },
+        {
+            "index": 10,
+            "executed": false
+        },
+        {
+            "index": 11,
+            "executed": false
+        },
+        {
+            "index": 12,
+            "executed": false
+        },
+        {
+            "index": 13,
+            "executed": false
+        },
+        {
+            "index": 14,
+            "executed": true
+        },
+        {
+            "index": 15,
+            "executed": true
+        },
+        {
+            "index": 16,
+            "executed": false
+        },
+        {
+            "index": 17,
+            "executed": false
+        },
+        {
+            "index": 18,
+            "executed": true
+        },
+        {
+            "index": 19,
+            "executed": false
+        },
+        {
+            "index": 20,
+            "executed": true
+        },
+        {
+            "index": 21,
+            "executed": false
+        },
+        {
+            "index": 22,
+            "executed": false
+        },
+        {
+            "index": 23,
+            "executed": true
+        },
+        {
+            "index": 24,
+            "executed": true
+        },
+        {
+            "index": 25,
+            "executed": true
+        },
+        {
+            "index": 26,
+            "executed": true
+        },
+        {
+            "index": 27,
+            "executed": true
+        },
+        {
+            "index": 28,
+            "executed": false
+        },
+        {
+            "index": 29,
+            "executed": false
+        }
+    ]
+}

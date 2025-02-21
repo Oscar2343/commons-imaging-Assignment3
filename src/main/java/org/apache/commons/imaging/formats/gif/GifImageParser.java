@@ -48,6 +48,7 @@ import org.apache.commons.imaging.mylzw.MyLzwCompressor;
 import org.apache.commons.imaging.mylzw.MyLzwDecompressor;
 import org.apache.commons.imaging.palette.Palette;
 import org.apache.commons.imaging.palette.PaletteFactory;
+import org.apache.commons.imaging.util.DIYBranchCoverage;
 
 public class GifImageParser extends AbstractImageParser<GifImagingParameters> implements XmpEmbeddable<GifImagingParameters> {
 
@@ -840,7 +841,12 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
     @Override
     public void writeImage(final BufferedImage src, final OutputStream os, GifImagingParameters params) throws ImagingException, IOException {
+        // initialize the branch test coverage result
+        DIYBranchCoverage.initResult();
+        DIYBranchCoverage.trackBranch(0);
+
         if (params == null) {
+            DIYBranchCoverage.trackBranch(1);
             params = new GifImagingParameters();
         }
 
@@ -852,24 +858,35 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
         final boolean hasAlpha = new PaletteFactory().hasTransparency(src);
 
         final int maxColors = hasAlpha ? 255 : 256;
+        // branch 0: maxColors=255, branch 2: maxColors=256
+        DIYBranchCoverage.trackBranch(hasAlpha ? 0: 2);
+
 
         Palette palette2 = new PaletteFactory().makeExactRgbPaletteSimple(src, maxColors);
         // int[] palette = new PaletteFactory().makePaletteSimple(src, 256);
         // Map palette_map = paletteToMap(palette);
 
         if (palette2 == null) {
+            DIYBranchCoverage.trackBranch(3);
             palette2 = new PaletteFactory().makeQuantizedRgbPalette(src, maxColors);
             if (LOGGER.isLoggable(Level.FINE)) {
+                DIYBranchCoverage.trackBranch(4);
                 LOGGER.fine("quantizing");
             }
         } else if (LOGGER.isLoggable(Level.FINE)) {
+            DIYBranchCoverage.trackBranch(5);
             LOGGER.fine("exact palette");
         }
 
         if (palette2 == null) {
+            DIYBranchCoverage.trackBranch(6);
+            DIYBranchCoverage.writeResult();
             throw new ImagingException("Gif: can't write images with more than 256 colors");
         }
+
         final int paletteSize = palette2.length() + (hasAlpha ? 1 : 0);
+        // branch 0: paletteSize = palette2.length() + 1, branch 7: paletteSize = palette2.length()
+        DIYBranchCoverage.trackBranch(hasAlpha ? 0 : 7);
 
         try (BinaryOutputStream bos = BinaryOutputStream.littleEndian(os)) {
 
@@ -889,6 +906,10 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
             final int colorTableScaleLessOne = paletteSize > 128 ? 7
                     : paletteSize > 64 ? 6 : paletteSize > 32 ? 5 : paletteSize > 16 ? 4 : paletteSize > 8 ? 3 : paletteSize > 4 ? 2 : paletteSize > 2 ? 1 : 0;
+            // branch 0: colorTableScaleLessOne = 7, branch 8: colorTableScaleLessOne = 6, branch 9: colorTableScaleLessOne = 5,
+            // branch 10: colorTableScaleLessOne = 4, branch 11: colorTableScaleLessOne = 3, branch 12: colorTableScaleLessOne = 2,
+            // branch 13: colorTableScaleLessOne = 1, branch 14: colorTableScaleLessOne = 0
+            DIYBranchCoverage.trackBranch(paletteSize > 128 ? 0 : paletteSize > 64 ? 8 : paletteSize > 32 ? 9 : paletteSize > 16 ? 10 : paletteSize > 8 ? 11 : paletteSize > 4 ? 12 : paletteSize > 2 ? 13 : 14);
 
             final int colorTableSizeInFormat = 1 << colorTableScaleLessOne + 1;
             {
@@ -918,6 +939,9 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
                 bos.write((byte) 4); // block size;
                 final int packedFields = hasAlpha ? 1 : 0; // transparency flag
+                // branch 0: packedFields = 1, branch 15: packedFields = 0
+                DIYBranchCoverage.trackBranch(hasAlpha ? 0 : 15);
+
                 bos.write((byte) packedFields);
                 bos.write((byte) 0); // Delay Time
                 bos.write((byte) 0); // Delay Time
@@ -928,6 +952,8 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
             }
 
             if (null != xmpXml) {
+                DIYBranchCoverage.trackBranch(16);
+
                 bos.write(EXTENSION_CODE);
                 bos.write(APPLICATION_EXTENSION_LABEL);
 
@@ -939,6 +965,8 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
                 // write "magic trailer"
                 for (int magic = 0; magic <= 0xff; magic++) {
+                    DIYBranchCoverage.trackBranch(17);
+
                     bos.write(0xff - magic);
                 }
 
@@ -964,10 +992,15 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
                     final int packedFields;
                     if (localColorTableFlag) {
+                        DIYBranchCoverage.trackBranch(18);
                         packedFields = LOCAL_COLOR_TABLE_FLAG_MASK | (interlaceFlag ? INTERLACE_FLAG_MASK : 0) | (sortFlag ? SORT_FLAG_MASK : 0)
                                 | 7 & sizeOfLocalColorTable;
+                        // branch 0: interlaceFlag = true, branch 19: sortFlag = true, branch 20: sortFlag = false
+                        DIYBranchCoverage.trackBranch(interlaceFlag ? 0 : sortFlag ? 19 : 20);
                     } else {
                         packedFields = 0 | (interlaceFlag ? INTERLACE_FLAG_MASK : 0) | (sortFlag ? SORT_FLAG_MASK : 0) | 7 & sizeOfLocalColorTable;
+                        // branch 0: interlaceFlag = true, branch 21: sortFlag = true, branch 22: sortFlag = false
+                        DIYBranchCoverage.trackBranch(interlaceFlag ? 0 : sortFlag ? 21 : 22);
                     }
                     bos.write(packedFields); // one byte
                 }
@@ -975,7 +1008,9 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
             { // write Local Color Table.
                 for (int i = 0; i < colorTableSizeInFormat; i++) {
+                    DIYBranchCoverage.trackBranch(23);
                     if (i < palette2.length()) {
+                        DIYBranchCoverage.trackBranch(24);
                         final int rgb = palette2.getEntry(i);
 
                         final int red = 0xff & rgb >> 16;
@@ -999,6 +1034,7 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
                 int lzwMinimumCodeSize = colorTableScaleLessOne + 1;
                 // LZWMinimumCodeSize = Math.max(8, LZWMinimumCodeSize);
                 if (lzwMinimumCodeSize < 2) {
+                    DIYBranchCoverage.trackBranch(25);
                     lzwMinimumCodeSize = 2;
                 }
 
@@ -1014,15 +1050,19 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
 
                 final byte[] imageData = Allocator.byteArray(width * height);
                 for (int y = 0; y < height; y++) {
+                    DIYBranchCoverage.trackBranch(26);
                     for (int x = 0; x < width; x++) {
+                        DIYBranchCoverage.trackBranch(27);
                         final int argb = src.getRGB(x, y);
                         final int rgb = 0xffffff & argb;
                         final int index;
 
                         if (hasAlpha) {
+                            DIYBranchCoverage.trackBranch(28);
                             final int alpha = 0xff & argb >> 24;
                             final int alphaThreshold = 255;
                             if (alpha < alphaThreshold) {
+                                DIYBranchCoverage.trackBranch(29);
                                 index = palette2.length(); // is transparent
                             } else {
                                 index = palette2.getPaletteIndex(rgb);
@@ -1043,8 +1083,9 @@ public class GifImageParser extends AbstractImageParser<GifImagingParameters> im
             // palette2.dump();
 
             bos.write(TERMINATOR_BYTE);
-
+            DIYBranchCoverage.writeResult();
         }
         os.close();
+        DIYBranchCoverage.writeResult();
     }
 }
